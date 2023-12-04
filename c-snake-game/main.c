@@ -10,14 +10,10 @@
 #include <unistd.h>
 #include <termios.h>
 #include <fcntl.h>
-
 // screen size
-#define WIDTH 20
-#define HEIGHT 10
+#define SIZE 10
 
-// start position for snake
-int y = 5;
-int x = 5;
+char buffer[SIZE][SIZE];
 
 void setNonBlockingMode(void) {
     struct termios ttystate;
@@ -32,7 +28,7 @@ void setNonBlockingMode(void) {
 }
 
 // Function to check if there's input ready to be read
-int kbhit() {
+int kbhit(void) {
     struct timeval tv;
     fd_set fds;
     tv.tv_sec = 0;
@@ -45,25 +41,58 @@ int kbhit() {
 
 
 void clearScreen(void) {
-    #ifdef WIN32
-        system("cls");
-    #else
-        system("clear");
-    #endif
+    for (int i = 0; i < 20; i++) {
+        printf("\n");
+    }
 }
+
+void initializeBuffer (void) {
+    for (int i = 0; i < SIZE; i++) {
+        for (int j = 0; j < SIZE; j++) {
+            buffer[i][j] = ' ';
+        }
+    }
+}
+
+void drawScreen (void) {
+    for (int i = 0; i < SIZE; i++) {
+        for (int j = 0; j < SIZE; j++) {
+            printf("%c", buffer[i][j]);
+        }
+        printf("\n");
+    }
+}
+
+
+int randomPlace () {
+    int numbero = rand() % (9 - 1 + 1) + 1;
+    printf("%d", numbero);
+    return numbero;
+};
+
 
 int main(void) {
     
-    char snakeHead = '@';
-    char direction = 'd';
+    setenv("TERM", "xterm", 1);
+    
     int isRunning = 1;
     
+    // start position for snake
+    int y = 5;
+    int x = 5;
+    char snakeHead = '@';
+    char direction = 'd';
+    
+    randomPlace();
+    
+    char apple = '*';
+    
     setNonBlockingMode();
+    initializeBuffer();
     
     while (isRunning == 1) {
-        clearScreen();
         
-        printf("%c", direction);
+        clearScreen();
         
         switch (direction) {
             case 'w':
@@ -80,28 +109,29 @@ int main(void) {
                 break;
         }
         
-        for (int dY = 0; dY <= HEIGHT; dY++) {
-            for (int dX = 0; dX <= WIDTH; dX++) {
-                
-                if (y == dY && x == dX) {
-                    printf("%c", snakeHead);
+    
+        for (int i = 0; i < SIZE; i++) {
+            for (int j = 0; j < SIZE; j++) {
+                if (i == 0 || i == SIZE - 1) {
+                    buffer[i][j] = '-';
+                } else if (j == 0 || j == SIZE - 1) {
+                    buffer[i][j] = '|';
+                } else if (y == i && x == j) {
+                    buffer[i][j] = snakeHead;
                 } else {
-                    printf(" ");
+                    buffer[i][j] = ' ';
                 }
                 
                 
-                if (y == HEIGHT || y == 0) {
-                    printf("y died here");
-                    isRunning = 0;
-                }
-                
-                if (x == WIDTH || x == 0) {
-                    printf("x died here");
+                buffer[7][8] = apple;
+
+                if (y == SIZE || y == 0 || x == SIZE || x == 0) {
                     isRunning = 0;
                 }
             }
-            printf("\n");
         }
+        
+        drawScreen();
         
         usleep(500000);
         
