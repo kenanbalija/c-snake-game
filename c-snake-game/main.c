@@ -64,7 +64,7 @@ void drawScreen (void) {
 }
 
 
-int randomPlace () {
+int randomPlace (void) {
     int numbero = rand() % (9 - 1 + 1) + 1;
     printf("%d", numbero);
     return numbero;
@@ -82,6 +82,7 @@ int main(void) {
     int x = 5;
     char snakeHead = '@';
     char direction = 'd';
+    char oppositeDirection = 'a';
     
     randomPlace();
     
@@ -109,7 +110,6 @@ int main(void) {
                 break;
         }
         
-    
         for (int i = 0; i < SIZE; i++) {
             for (int j = 0; j < SIZE; j++) {
                 if (i == 0 || i == SIZE - 1) {
@@ -138,13 +138,26 @@ int main(void) {
         
         if (kbhit()) {
             int input = getchar();
-            switch(input) {
-                case 'w':
-                case 'a':
-                case 's':
-                case 'd':
-                    direction = input;
-                    break;
+            // can't move in opposite direction
+            if (input != oppositeDirection) {
+                switch(input) {
+                    case 'w':
+                        oppositeDirection = 's';
+                        direction = input;
+                        break;
+                    case 'a':
+                        oppositeDirection = 'd';
+                        direction = input;
+                        break;
+                    case 's':
+                        oppositeDirection = 'w';
+                        direction = input;
+                        break;
+                    case 'd':
+                        oppositeDirection = 'a';
+                        direction = input;
+                        break;
+                }
             }
         }
         
